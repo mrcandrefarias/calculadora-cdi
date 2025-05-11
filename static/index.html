@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora CDI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      max-width: 600px;
+    }
+    label {
+      display: block;
+      margin-top: 20px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+    }
+    .resultado {
+      background: #f4f4f4;
+      padding: 20px;
+      margin-top: 30px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Calculadora de Renda Fixa - CDI</h1>
+
+  <label for="valor_investido">Valor Investido (R$)</label>
+  <input type="number" id="valor_investido" placeholder="Ex: 10000" />
+
+  <label for="percentual_cdi">% do CDI</label>
+  <input type="number" id="percentual_cdi" placeholder="Ex: 100" />
+
+  <label for="prazo_dias">Prazo (em dias úteis)</label>
+  <input type="number" id="prazo_dias" placeholder="Ex: 360" />
+
+  <button onclick="calcular()">Calcular</button>
+
+  <div id="resultado" class="resultado" style="display: none;"></div>
+
+  <script>
+    async function calcular() {
+      const valor_investido = parseFloat(document.getElementById("valor_investido").value);
+      const percentual_cdi = parseFloat(document.getElementById("percentual_cdi").value);
+      const prazo_dias = parseInt(document.getElementById("prazo_dias").value);
+
+      const resposta = await fetch("http://127.0.0.1:5000/calcular", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ valor_investido, percentual_cdi, prazo_dias })
+      });
+
+      const dados = await resposta.json();
+
+      const div = document.getElementById("resultado");
+      div.style.display = "block";
+      div.innerHTML = `
+        <h3>Resultado da Simulação</h3>
+        <p><strong>Valor Investido:</strong> R$ ${dados.valor_investido.toFixed(2)}</p>
+        <p><strong>Valor Bruto:</strong> R$ ${dados.valor_bruto.toFixed(2)}</p>
+        <p><strong>Imposto (${dados.aliquota_ir}):</strong> R$ ${dados.imposto.toFixed(2)}</p>
+        <p><strong>Valor Líquido:</strong> R$ ${dados.valor_liquido.toFixed(2)}</p>
+        <p><strong>Rentabilidade Total:</strong> ${dados.rentabilidade_percentual.toFixed(2)}%</p>
+      `;
+    }
+  </script>
+
+</body>
+</html>
+
